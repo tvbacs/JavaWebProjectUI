@@ -17,14 +17,12 @@ const publicRoutes = [
         { path: '/', component : HomePage},
         { path: '/laptop', component : LaptopPage,layout: LabTopLayout},
         { path: '/mobile', component : MobilePage},
-        { path: '/product', component : ProducDetail ,layout : ProducDetailLayout},
-        { path: '/buy', component : BuyPage ,layout : OnlyHeaderLayout},
+        { path: '/product/:id', component : ProducDetail ,layout : ProducDetailLayout},
         { path: '/profile', component : Profile ,layout : OnlyHeaderLayout},
 ]
 
 const privateRoutes = [
-        { path: '/buy', component : BuyPage},
-
+        { path: '/buy/:id', component : BuyPage,layout : OnlyHeaderLayout},
 ]
 
 export { publicRoutes ,privateRoutes}

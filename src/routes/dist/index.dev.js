@@ -48,13 +48,9 @@ var publicRoutes = [{
   path: '/mobile',
   component: _MobilePage.default
 }, {
-  path: '/product',
+  path: '/product/:id',
   component: _ProductDetail.default,
   layout: _ProductDetailLayout.default
-}, {
-  path: '/buy',
-  component: _BuyPage.default,
-  layout: _OnlyHeaderLayout.default
 }, {
   path: '/profile',
   component: _Profile.default,
@@ -62,8 +58,9 @@ var publicRoutes = [{
 }];
 exports.publicRoutes = publicRoutes;
 var privateRoutes = [{
-  path: '/buy',
-  component: _BuyPage.default
+  path: '/buy/:id',
+  component: _BuyPage.default,
+  layout: _OnlyHeaderLayout.default
 }];
 exports.privateRoutes = privateRoutes;
 //# sourceMappingURL=index.dev.js.map

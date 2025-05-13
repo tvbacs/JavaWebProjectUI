@@ -7,10 +7,12 @@ import { AiOutlineUser } from "react-icons/ai";
 import { LiaMoneyCheckAltSolid } from "react-icons/lia";
 import { MdProductionQuantityLimits } from "react-icons/md";
 import { useState } from "react";
+import { useUser } from "@/contexts/UserContext";
 
 const cx = classNames.bind(styles)
 function Profile() {
     const [activeTab, setActiveTab] = useState("info");
+    const { user } = useUser();
 
     return ( 
         <div className={cx('wrapper')}>
@@ -51,10 +53,10 @@ function Profile() {
                 <div className={cx('content-tab')}>
                     {activeTab === "info" && <div className={cx('information')}>
                             <div className={cx('flex','items-center','mb-[20px]')}>
-                                <img className={cx('avt')} alt='' src="/images/testavt.png" />
+                                <img className={cx('avt')} alt='' src={user?.avatar ? `${process.env.REACT_APP_API_URL}${user.avatar}` : "../images/testavt.png"} />
                                 <div className={cx('flex','flex-col')}>
-                                    <h1 className={cx('text-[20px]','font-semibold','text-[#263646]')}>Nguyễn Quang Hoàng</h1>
-                                    <span  className={cx('text-[16px]','mt-10[10px]')}>userid</span>
+                                    <h1 className={cx('text-[20px]','font-semibold','text-[#263646]')}>{user?.fullname || 'Fullname'}</h1>
+                                    <span  className={cx('text-[16px]','mt-10[10px]')}>{user?.userId}</span>
                                 </div>
                             </div>
                             <div className={cx('w-full')}>
@@ -63,21 +65,21 @@ function Profile() {
                                     <div className={cx('w-full','flex','justify-between','items-center')}>
                                         <div className={cx('form-group')}>
                                             <label>Họ và tên</label>
-                                            <input placeholder="Nguyễn Quang Hoàng"/>
+                                            <input placeholder={user?.fullname || 'fullname...'}/>
                                         </div>
                                          <div className={cx('form-group')}>
                                             <label>Username</label>
-                                            <input placeholder="hoangnq.jl"/>
+                                            <input placeholder={user?.username || 'username...'}/>
                                         </div>
                                     </div>
                                      <div className={cx('w-full','flex','justify-between','items-center','my-[20px]')}>
                                         <div className={cx('form-group')}>
                                             <label>Email</label>
-                                            <input placeholder="Nguyễn Quang Hoàng"/>
+                                            <input placeholder={user?.email || 'email...'}/>
                                         </div>
                                          <div className={cx('form-group')}>
                                             <label>Số điện thoại</label>
-                                            <input placeholder="hoangnq.jl"/>
+                                            <input placeholder={user?.phoneNumber || 'phonenumber...'}/>
                                         </div>
                                     </div>
                                     <button className={cx('btn-submit')}>Lưu thông tin</button>
@@ -129,7 +131,7 @@ function Profile() {
                                 <div className={cx('flex','items-center','justify-between')}>
                                     <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
                                         <p className={cx('font-normal','text-[14px]')}>Tên khách hàng:</p>
-                                        <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Nguyễn Quang Hoàng</span>
+                                        <span className={cx('font-medium','text-[14px]','ml-[6px]')}>{user?.fullname}</span>
                                     </div>
                                     <span className={cx('font-semibold','text-[14px]','text-red-500')}>ĐANG XỬ LÝ</span>
                                 </div>

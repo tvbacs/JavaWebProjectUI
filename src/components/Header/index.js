@@ -8,11 +8,14 @@ import { IoMenu } from "react-icons/io5";
 
 import { useState } from 'react';
 import Menu from '../Menu';
+import { useUser } from '@/contexts/UserContext';
 
 const cx = classNames.bind(styles);
 function Header() {
     const [isLogin , setIsLogin] = useState(true);
     const [isShowMenu, setIsShowMenu] = useState(false);
+    const { user } = useUser();
+
     return (  
         <div className={cx("wrapper",'w-full')}>
             <div className={cx('content', 'flex','justify-between','items-center')}>
@@ -65,7 +68,8 @@ function Header() {
                                 <RiUserReceivedLine className={cx('text-[20px]','btn-login-icon')}/>
                                 <Link to='/login' ><span className={cx('text-[14px]','btn-login-title','ml-[6px]','lg:block','hidden')}>login now!</span></Link>
                                  </NavLink>:
-                               <Link to='/profile'> <img src="/images/testavt.png" alt="avatar"  className={cx('w-[40px]','h-[40px]','rounded-[50%]','cursor-pointer','avt-auth')}/></Link>
+                               <Link to='/profile'> <img                     src={user?.avatar ? `${process.env.REACT_APP_API_URL}${user.avatar}` : "../images/testavt.png"}
+                                     alt="avatar"  className={cx('w-[40px]','h-[40px]','rounded-[50%]','cursor-pointer','avt-auth')}/></Link>
                             }
                             <div className={cx('btn-menu','lg:hidden')} onClick={() => setIsShowMenu(prev => !prev)}>
                                 <IoMenu className={cx('lg:hidden')}/>

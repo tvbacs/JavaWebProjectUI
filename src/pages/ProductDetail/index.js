@@ -1,136 +1,303 @@
-
 import classNames from "classnames/bind";
-import styles from './ProductDetail.module.scss';
+import styles from "./ProductDetail.module.scss";
 import { LuShoppingCart } from "react-icons/lu";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Item from "@/components/Item";
 import Scroll from "@/components/Scroll";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import electronicService from "@/services/electronicService";
 
+const cx = classNames.bind(styles);
 
-const cx = classNames.bind(styles)
-function ProducDetail() {
-    const scrollRef= useRef(null);
-     const products = [
-        {
-            name:'',
-            price:''
-        },
-          {
-            name:'',
-            price:''
-        },  {
-            name:'',
-            price:''
-        },  {
-            name:'',
-            price:''
+// Object cache để lưu trữ dữ liệu sản phẩm và sản phẩm liên quan
+const cache = {
+  products: {},
+  relatedProducts: {},
+};
+
+function ProductDetail() {
+  const { id } = useParams();
+  const scrollRef = useRef(null);
+  const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      if (cache.products[id]) {
+        setProduct(cache.products[id]);
+        setRelatedProducts(cache.relatedProducts[id] || []);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const productResult = await electronicService.getElectronicById(id);
+        if (productResult.success) {
+          setProduct(productResult.data);
+          cache.products[id] = productResult.data;
+        } else {
+          setError(productResult.message);
         }
-        ,  {
-            name:'',
-            price:''
+
+        const allProductsResult = await electronicService.getAllElectronics();
+        if (allProductsResult.success) {
+          const related = allProductsResult.data
+            .filter(
+              (p) =>
+                p.brand.brand_id === productResult.data.brand.brand_id &&
+                p.id !== id &&
+                p.status === "instock"
+            )
+            .slice(0, 9);
+          setRelatedProducts(related);
+          cache.relatedProducts[id] = related;
+        } else {
+          setError(allProductsResult.message);
         }
-        ,  {
-            name:'',
-            price:''
-        }
-        ,  {
-            name:'',
-            price:''
-        }
-        ,  {
-            name:'',
-            price:''
-        }
-        ,  {
-            name:'',
-            price:''
-        }
-    ]
-    return ( 
-       <>
-            <div className={cx('wrapper')}>
-                <div className={cx('content')}>
-                    <div className={cx('info')}>
-                        <div className={cx('info-left')}>
-                            <h1>Samsung Galaxy S23 Plus</h1>
-                            <img alt='productimg' src="/images/ss.png"/>
-                        </div>
-                         <div className={cx('info-right')}>
-                            <div className={cx('flex','justify-between','items-center')}>
-                                <div className={cx('price','flex','items-center','justify-start')}>
-                                    <span className={cx('font-medium','text-[16px]','mr-[10px]')}>Giá cả: </span>
-                                    <span className={cx('font-semibold','text-[18px]','text-red-500')}>1.000.000 đ</span>
-                                </div>
-                                <div className={cx('buy','flex','items-center','justify-center')}>
-                                    <div className={cx('cart','mr-[10px]')}>
-                                        <LuShoppingCart className={cx('text-[20px]')}/>
-                                    </div>
-                                    <Link to='/buy' className={cx('buy-btn')}>Mua ngay</Link>
-                                </div>
-                            </div>
-                            <div className={cx('infor-product')}>
-                                <h1 className={cx('text-[16px]','font-semibold','mb-[20px]')}>Thông tin sản phẩm</h1>
-                                <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>Màn hình</span>
-                                    <p>2 days 1 night</p>
-                                </div>
-                                 <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>Vi xử lí</span>
-                                    <p>Sightseeing, Food, Culture</p>
-                                </div>
-                                 <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>RAM</span>
-                                    <p>10 people</p>
-                                </div>
-                                 <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>Bộ nhớ trong</span>
-                                    <p>Hilton Da Nang</p>
-                                </div>
-                                 <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>Chất liệu</span>
-                                    <p>Da Nang International Airport</p>
-                                </div>
-                                 <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>Hệ điều hành</span>
-                                    <p>Da Nang International Airport</p>
-                                </div>
-                                 <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>Dung lượng pin</span>
-                                    <p>Da Nang International Airport</p>
-                                </div>
-                                 <div className={cx('infor-product-item','w-full','flex','justify-between','items-center')}>
-                                    <span>Năm sản xuất</span>
-                                    <p>Da Nang International Airport</p>
-                                </div>
-    
-    
-                            </div>
-                        </div>
-                    </div>
-                     <div className={cx('descript')}>
-                        <h1 className={cx('font-semibold','text-[16px]','mb-[10px]')}>Mô tả chi tiết</h1>
-                        <span className={cx('description')}>
-                            Samsung Galaxy S23 là mẫu điện thoại cao cấp nhỏ gọn được Samsung ra mắt vào đầu năm 2023. Máy sở hữu thiết kế tinh tế với mặt kính Gorilla Glass Victus 2 và khung viền nhôm chắc chắn, đạt chuẩn kháng nước IP68. Màn hình 6.1 inch Dynamic AMOLED 2X mang đến hình ảnh sắc nét, mượt mà với tần số quét 120Hz. Bên trong, Galaxy S23 được trang bị vi xử lý Snapdragon 8 Gen 2 for Galaxy mạnh mẽ, kết hợp RAM 8GB và bộ nhớ trong lên đến 512GB. Hệ thống ba camera sau, với camera chính 50MP, cho phép chụp ảnh rõ nét và quay video chất lượng cao. Với viên pin 3.900mAh cùng khả năng sạc nhanh và sạc không dây, Galaxy S23 đáp ứng tốt nhu cầu sử dụng hàng ngày. Đây là lựa chọn lý tưởng cho người dùng yêu thích sự nhỏ gọn nhưng vẫn muốn trải nghiệm hiệu năng mạnh mẽ và công nghệ cao cấp.
-                        </span>
-                    </div>
-                </div>
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        setError("Không thể tải chi tiết sản phẩm");
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [id]);
+
+  if (loading) return <div className={cx("wrapper")}>Đang tải...</div>;
+  if (error) return <div className={cx("wrapper")}>{error}</div>;
+  if (!product) return <div className={cx("wrapper")}>Sản phẩm không tồn tại</div>;
+
+  const formattedPrice = Number(product.price).toLocaleString("vi-VN") + " đ";
+  const imageSrc = product.image
+    ? `${process.env.REACT_APP_API_URL}${product.image}`
+    : "/images/item.png";
+
+  // Logic cho nút "Mua ngay"/"Hết hàng"
+  const isInStock = product.status === "instock";
+  const buyButtonText = isInStock ? "Mua ngay" : "Hết hàng";
+  const buyButtonLink = isInStock ? `/buy/${product.id}` : "#"; // Sửa thành path parameter
+  const buyButtonClass = cx("buy-btn", { disabled: !isInStock });
+
+  return (
+    <>
+      <div className={cx("wrapper")}>
+        <div className={cx("content")}>
+          <div className={cx("info")}>
+            <div className={cx("info-left")}>
+              <h1>{product.name}</h1>
+              <img alt={product.name} src={imageSrc} />
             </div>
-             <div className={cx('my-[20px]')}>
-                    <h1 className={cx('font-bold','text-[18px]','mb-[16px]','mt-[30px]')}>Sản phẩm liên quan</h1>
-                     <div className={cx('product')}>
-                        <div className={cx('w-full','relative')}>
-                            <div className={cx('products')} ref={scrollRef}>
-                                {products.map((product,index)=>{
-                                    return <Item product={product} />
-                                })}
-                            </div>
-                              <Scroll scrollRef={scrollRef} />
-                        </div>
-                    </div>
+            <div className={cx("info-right")}>
+              <div className={cx("flex", "justify-between", "items-center")}>
+                <div className={cx("price", "flex", "items-center", "justify-start")}>
+                  <span className={cx("font-medium", "text-[16px]", "mr-[10px]")}>
+                    Giá cả:
+                  </span>
+                  <span className={cx("font-semibold", "text-[18px]", "text-red-500")}>
+                    {formattedPrice}
+                  </span>
                 </div>
-       </>
-     );
+                <div className={cx("buy", "flex", "items-center", "justify-center")}>
+                  <div className={cx("cart", "mr-[10px]")}>
+                    <LuShoppingCart className={cx("text-[20px]")} />
+                  </div>
+                  <Link
+                    to={buyButtonLink}
+                    className={buyButtonClass}
+                    title={isInStock ? "" : "Sản phẩm hiện đã hết hàng"}
+                  >
+                    {buyButtonText}
+                    {isInStock && product.quantity && (
+                      <span className={cx("quantity-info")}>
+                        (Còn {product.quantity})
+                      </span>
+                    )}
+                  </Link>
+                </div>
+              </div>
+              <div className={cx("infor-product")}>
+                <h1 className={cx("text-[16px]", "font-semibold", "mb-[20px]")}>
+                  Thông tin sản phẩm
+                </h1>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Màn hình</span>
+                  <p>{product.screen || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Vi xử lí</span>
+                  <p>{product.cpu || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>GPU</span>
+                  <p>{product.gpu || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>RAM</span>
+                  <p>{product.ram || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Bộ nhớ trong</span>
+                  <p>{product.storageCapacity || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Chất liệu</span>
+                  <p>{product.material || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Hệ điều hành</span>
+                  <p>{product.operatingSystem || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Dung lượng pin</span>
+                  <p>{product.batteryLife || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Công suất sạc</span>
+                  <p>{product.powerRating || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Năm sản xuất</span>
+                  <p>{product.manufactureYear || "Không có thông tin"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Trạng thái</span>
+                  <p>{product.status === "instock" ? "Còn hàng" : "Hết hàng"}</p>
+                </div>
+                <div
+                  className={cx(
+                    "infor-product-item",
+                    "w-full",
+                    "flex",
+                    "justify-between",
+                    "items-center"
+                  )}
+                >
+                  <span>Số lượng</span>
+                  <p>{product.quantity || "Không có thông tin"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={cx("descript")}>
+            <h1 className={cx("font-semibold", "text-[16px]", "mb-[10px]")}>
+              Mô tả chi tiết
+            </h1>
+            <span className={cx("description")}>
+              {product.description || "Không có mô tả"}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className={cx("my-[20px]")}>
+        <h1 className={cx("font-bold", "text-[18px]", "mb-[16px]", "mt-[30px]")}>
+          Sản phẩm liên quan
+        </h1>
+        <div className={cx("product")}>
+          <div className={cx("w-full", "relative")}>
+            <div className={cx("products")} ref={scrollRef}>
+              {relatedProducts.map((relatedProduct) => (
+                <Item key={relatedProduct.id} product={relatedProduct} />
+              ))}
+            </div>
+            <Scroll scrollRef={scrollRef} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
 
-export default ProducDetail;
+export default ProductDetail;
