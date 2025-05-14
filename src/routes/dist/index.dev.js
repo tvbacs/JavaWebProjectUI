@@ -27,6 +27,8 @@ var _Profile = _interopRequireDefault(require("@/pages/Profile"));
 
 var _LaptopLayout = _interopRequireDefault(require("@/layout/LaptopLayout"));
 
+var _Cart = _interopRequireDefault(require("@/pages/Cart"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var publicRoutes = [{
@@ -60,6 +62,10 @@ exports.publicRoutes = publicRoutes;
 var privateRoutes = [{
   path: '/buy/:id',
   component: _BuyPage.default,
+  layout: _OnlyHeaderLayout.default
+}, {
+  path: '/cart',
+  component: _Cart.default,
   layout: _OnlyHeaderLayout.default
 }];
 exports.privateRoutes = privateRoutes;

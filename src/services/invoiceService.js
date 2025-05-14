@@ -1,27 +1,26 @@
 import request from '../utils/request';
-
 const invoiceService = {
   createInvoice: async ({ address, paymentMethod, purchasedItems, totalPrice, status }) => {
     try {
-      const response = await request.post(
-        '/invoices',
-        null,
-        {
-          params: {
-            address,
-            paymentMethod,
-            purchasedItems,
-            totalPrice,
-            status,
-          },
-        }
-      );
+      const formData = new URLSearchParams();
+      formData.append("address", address);
+      formData.append("paymentMethod", paymentMethod);
+      formData.append("purchasedItems", purchasedItems); // purchasedItems giờ là chuỗi
+      formData.append("totalPrice", totalPrice);
+      formData.append("status", status);
+
+      const response = await request.post("/invoices", formData, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
       return {
         success: true,
         data: response.data,
       };
     } catch (error) {
-      const message = error.response?.data?.error || 'Không thể tạo hóa đơn';
+      const message = error.response?.data?.error || "Không thể tạo hóa đơn";
       return { success: false, message };
     }
   },
@@ -39,5 +38,6 @@ const invoiceService = {
     }
   },
 };
+
 
 export default invoiceService;

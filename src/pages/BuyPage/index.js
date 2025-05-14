@@ -1,8 +1,7 @@
 import classNames from "classnames/bind";
 import styles from "./BuyPage.module.scss";
 import { IoIosArrowBack } from "react-icons/io";
-import { GoPlus } from "react-icons/go";
-import { GoDash } from "react-icons/go";
+import { GoPlus, GoDash } from "react-icons/go";
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import electronicService from "@/services/electronicService";
@@ -12,13 +11,12 @@ import invoiceService from "@/services/invoiceService";
 const cx = classNames.bind(styles);
 
 function BuyPage() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [numberOne, setNumberOne] = useState(1);
-  const [numberTwo, setNumberTwo] = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-    const { user } = useUser();
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -35,16 +33,15 @@ function BuyPage() {
 
       try {
         const productResult = await electronicService.getElectronicById(id);
-        console.log("BuyPage Product Result:", productResult);
         if (productResult.success) {
           setProduct(productResult.data);
         } else {
           setError(productResult.message);
         }
-        setLoading(false);
       } catch (err) {
         console.error("BuyPage Fetch Error:", err);
         setError("Không thể tải thông tin sản phẩm");
+      } finally {
         setLoading(false);
       }
     };
@@ -56,43 +53,34 @@ function BuyPage() {
   if (error) return <div className={cx("wrapper")}>{error}</div>;
   if (!product) return <div className={cx("wrapper")}>Sản phẩm không tồn tại</div>;
 
-  const formattedPrice = Number(product.price).toLocaleString("vi-VN") + " đ";
-  const totalPrice = (Number(product.price) * (numberOne + numberTwo)).toLocaleString("vi-VN") + " đ";
+  const totalPrice = Number(product.price) * quantity;
+  const formattedPrice = totalPrice.toLocaleString("vi-VN") + " đ";
   const imageSrc = product.image
     ? `${process.env.REACT_APP_API_URL}${product.image}`
     : "/images/item.png";
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
 
-  const purchasedItems = [
-    {
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      quantity: numberOne + numberTwo,
-    },
-  ];
+    const purchasedItem = `${product.name} SL${quantity}`;
 
-  const invoicePayload = {
-    address: `${formData.get("address")}, ${formData.get("ward")}, ${formData.get("province")}`,
-    paymentMethod: formData.get("paymentMethod"),
-    purchasedItems: JSON.stringify(purchasedItems), 
-    totalPrice: Number(product.price) * (numberOne + numberTwo),
-    status: "processing", 
+    const invoicePayload = {
+      address: `${formData.get("address")}, ${formData.get("ward")}, ${formData.get("province")}`,
+      paymentMethod: formData.get("paymentMethod"),
+      purchasedItems: purchasedItem, 
+      totalPrice,
+      status: "processing",
+    };
+
+    const result = await invoiceService.createInvoice(invoicePayload);
+
+    if (result.success) {
+      alert("Đặt hàng thành công!");
+    } else {
+      alert("Lỗi: " + result.message);
+    }
   };
-
-  console.log("Sending Invoice:", invoicePayload);
-
-  const result = await invoiceService.createInvoice(invoicePayload);
-
-  if (result.success) {
-    alert("Đặt hàng thành công!");
-  } else {
-    alert("Lỗi: " + result.message);
-  }
-};
 
   return (
     <div className={cx("wrapper")}>
@@ -104,9 +92,6 @@ function BuyPage() {
         <div className={cx("body", "flex", "items-start", "justify-between")}>
           <div className={cx("product", "w-[40%]")}>
             <div className={cx("product-item")}>
-              {/* <div className={cx("choose")}>
-                <input type="radio" name="product" />
-              </div> */}
               <div className={cx("product-img")}>
                 <img alt={product.name} src={imageSrc} />
               </div>
@@ -119,13 +104,13 @@ function BuyPage() {
                   <div className={cx("flex", "items-center", "number", "justify-center")}>
                     <GoDash
                       className={cx("cursor-pointer")}
-                      onClick={() => setNumberTwo((prev) => Math.max(1, prev - 1))}
+                      onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
                     />
-                    <span className={cx("mx-[20px]", "font-semibold")}>{numberTwo}</span>
+                    <span className={cx("mx-[20px]", "font-semibold")}>{quantity}</span>
                     <GoPlus
                       className={cx("cursor-pointer")}
                       onClick={() =>
-                        setNumberTwo((prev) =>
+                        setQuantity((prev) =>
                           product.quantity ? Math.min(product.quantity, prev + 1) : prev + 1
                         )
                       }
@@ -137,7 +122,7 @@ function BuyPage() {
             <div className={cx("price")}>
               <span className={cx("font-medium", "text-[16px]")}>Tổng giá trị:</span>
               <span className={cx("ml-[10px]", "font-bold", "text-red-500")}>
-                {totalPrice}
+                {formattedPrice}
               </span>
             </div>
           </div>
@@ -150,18 +135,18 @@ function BuyPage() {
             </span>
             <form className={cx("form")} onSubmit={handleSubmit}>
               <div className={cx("form-group")}>
-                <input name="fullName" placeholder={user.fullname || 'fullname...'} />
+                <input name="fullName" placeholder={user?.fullname || "fullname..."} />
               </div>
               <div className={cx("form-group")}>
                 <input
                   name="phone"
-                  placeholder={user.phoneNumber || 'phonenumber...'}
+                  placeholder={user?.phoneNumber || "phonenumber..."}
                   type="tel"
                   pattern="[0-9]{10,11}"
                 />
               </div>
               <div className={cx("form-group")}>
-                <input name="email" placeholder={user.email || 'email...'} type="email"  />
+                <input name="email" placeholder={user?.email || "email..."} type="email" />
               </div>
               <h1 className={cx("text-[#263646]", "mr-auto", "font-bold", "mb-[10px]")}>
                 Nơi nhận hàng

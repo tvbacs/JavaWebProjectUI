@@ -4,8 +4,10 @@ import { LuShoppingCart } from "react-icons/lu";
 import { useRef, useState, useEffect } from "react";
 import Item from "@/components/Item";
 import Scroll from "@/components/Scroll";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom"; // Thay useParams bằng useNavigate
 import electronicService from "@/services/electronicService";
+import cartService from "@/services/cartService"; // Import cartService
+import { useUser } from "@/contexts/UserContext";
 
 const cx = classNames.bind(styles);
 
@@ -18,6 +20,8 @@ const cache = {
 function ProductDetail() {
   const { id } = useParams();
   const scrollRef = useRef(null);
+  const navigate = useNavigate(); 
+  const { user } = useUser();
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +72,29 @@ function ProductDetail() {
     fetchProductDetails();
   }, [id]);
 
+  const handleAddToCart = async () => {
+    if (!product || product.status !== "instock") {
+      alert("Sản phẩm không có sẵn để thêm vào giỏ hàng!");
+      return;
+    }
+
+    try {
+      const result = await cartService.addToCart({
+        electronicId: product.id,
+        quantity: 1,
+      });
+      if (result.success) {
+        alert("Thêm thành công!");
+        navigate('/cart');
+      } else {
+        alert("Lỗi: " + result.message);
+      }
+    } catch (err) {
+      console.error("Add to cart error:", err);
+      alert("Không thể thêm sản phẩm vào giỏ hàng: " + err.message);
+    }
+  };
+
   if (loading) return <div className={cx("wrapper")}>Đang tải...</div>;
   if (error) return <div className={cx("wrapper")}>{error}</div>;
   if (!product) return <div className={cx("wrapper")}>Sản phẩm không tồn tại</div>;
@@ -80,7 +107,7 @@ function ProductDetail() {
   // Logic cho nút "Mua ngay"/"Hết hàng"
   const isInStock = product.status === "instock";
   const buyButtonText = isInStock ? "Mua ngay" : "Hết hàng";
-  const buyButtonLink = isInStock ? `/buy/${product.id}` : "#"; // Sửa thành path parameter
+  const buyButtonLink = isInStock ? `/buy/${product.id}` : "#";
   const buyButtonClass = cx("buy-btn", { disabled: !isInStock });
 
   return (
@@ -103,9 +130,9 @@ function ProductDetail() {
                   </span>
                 </div>
                 <div className={cx("buy", "flex", "items-center", "justify-center")}>
-                  <div className={cx("cart", "mr-[10px]")}>
+                  <button onClick={handleAddToCart} className={cx("cart", "mr-[10px]")}>
                     <LuShoppingCart className={cx("text-[20px]")} />
-                  </div>
+                  </button>
                   <Link
                     to={buyButtonLink}
                     className={buyButtonClass}

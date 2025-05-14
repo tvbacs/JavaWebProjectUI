@@ -9,6 +9,7 @@ import ProducDetailLayout from "@/layout/ProductDetailLayout"
 import OnlyHeaderLayout from "@/layout/OnlyHeaderLayout"
 import Profile from "@/pages/Profile"
 import LabTopLayout from "@/layout/LaptopLayout"
+import CartPage from "@/pages/Cart"
 
 
 const publicRoutes = [
@@ -23,6 +24,7 @@ const publicRoutes = [
 
 const privateRoutes = [
         { path: '/buy/:id', component : BuyPage,layout : OnlyHeaderLayout},
+        { path: '/cart', component : CartPage,layout : OnlyHeaderLayout},
 ]
 
 export { publicRoutes ,privateRoutes}

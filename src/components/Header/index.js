@@ -5,8 +5,9 @@ import { IoSearchOutline } from "react-icons/io5";
 import { RiShoppingCart2Line } from "react-icons/ri";
 import { RiUserReceivedLine } from "react-icons/ri";
 import { IoMenu } from "react-icons/io5";
+import electronicService from '@/services/electronicService'; 
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Menu from '../Menu';
 import { useUser } from '@/contexts/UserContext';
 
@@ -14,8 +15,28 @@ const cx = classNames.bind(styles);
 function Header() {
     const [isLogin , setIsLogin] = useState(true);
     const [isShowMenu, setIsShowMenu] = useState(false);
+     const [keyword, setKeyword] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const { user } = useUser();
+    useEffect(() => {
+            const delayDebounce = setTimeout(() => {
+                const fetchResults = async () => {
+                    if (keyword.trim() === '') {
+                        setSearchResults([]);
+                        return;
+                    }
+                    const { success, data } = await electronicService.searchElectronics(keyword);
+                    if (success) {
+                        setSearchResults(data);
+                    } else {
+                        setSearchResults([]);
+                    }
+                };
+                fetchResults();
+            }, 300); // debounce 300ms
 
+            return () => clearTimeout(delayDebounce);
+        }, [keyword]);
     return (  
         <div className={cx("wrapper",'w-full')}>
             <div className={cx('content', 'flex','justify-between','items-center')}>
@@ -55,13 +76,30 @@ function Header() {
                         </ul>
                 </div>
                 <div className={cx('flex','justify-center','items-center')}>
-                    <div className={cx('search','flex','items-center')}>
-                        <IoSearchOutline className={cx('search-icon')}/>
-                        <input  className={cx('search-input')} placeholder="Tìm kiếm sản phẩm..."/>
-                    </div>
-                    <div className={cx('cart')}>
+                   <div className={cx('search','flex','items-center','relative')}>
+                    <IoSearchOutline className={cx('search-icon')} />
+                    <input
+                        className={cx('search-input')}
+                        placeholder="Tìm kiếm sản phẩm..."
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                    />
+                    {searchResults.length > 0 && (
+                        <ul className={cx('search-results','absolute','top-full','left-0','bg-white','shadow-md','z-10','w-full','max-h-[300px]','overflow-y-auto')}>
+                            {searchResults.map((item) => (
+                                <li key={item.id} className={cx('search-result-item','p-2','cursor-pointer','hover:bg-gray-100')}>
+                                    <Link to={`/product/${item.id}`} onClick={() => setKeyword('')}>
+                                        {item.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                    <Link to ='/cart' className={cx('cart')}>
                         <RiShoppingCart2Line className={cx('text-[20px]')}/>
-                    </div>
+                    </Link>
                     <div className={cx('auth','flex')}>
                             {!isLogin ? 
                                  <NavLink to="/login" className={cx('btn-login')}>
