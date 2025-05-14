@@ -108,7 +108,7 @@ function CartPage() {
         </Link>
         <div className={cx("body", "flex", "items-start", "justify-between")}>
           <div className={cx("product", "w-[40%]")}>
-            <div className={cx("product-list", "max-h-[450px]", "overflow-y-auto")}>
+            <div className={cx("product-list", "max-h-[500px]", "overflow-y-auto")}>
               {cartItems.length > 0 ? (
                 cartItems.map((item) => {
                   const imageSrc = item.electronic.image
