@@ -1,4 +1,3 @@
-
 import classNames from "classnames/bind";
 import styles from './Profile.module.scss'
 import { MdOutlineArrowBackIos } from "react-icons/md";
@@ -6,13 +5,47 @@ import { Link } from "react-router-dom";
 import { AiOutlineUser } from "react-icons/ai";
 import { LiaMoneyCheckAltSolid } from "react-icons/lia";
 import { MdProductionQuantityLimits } from "react-icons/md";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
+import invoiceService from "@/services/invoiceService";
 
 const cx = classNames.bind(styles)
 function Profile() {
     const [activeTab, setActiveTab] = useState("info");
-    const { user } = useUser();
+    const { user, token } = useUser();
+    const [invoices, setInvoices] = useState([]);
+    const [pendingInvoices, setPendingInvoices] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchInvoices = async () => {
+            setLoading(true);
+            try {
+                const result = await invoiceService.getInvoicesByUser();
+                if (result.success) {
+                    const processedInvoices = (result.data || []).filter(
+                        invoice => invoice.status === "processed"
+                    );
+                    const processingInvoices = (result.data || []).filter(
+                        invoice => invoice.status === "processing"
+                    );
+                    setInvoices(processedInvoices);
+                    setPendingInvoices(processingInvoices);
+                } else {
+                    setError(result.message);
+                }
+            } catch (err) {
+                setError("Không thể tải danh sách hóa đơn: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (activeTab === "bill" || activeTab === "order") {
+            fetchInvoices();
+        }
+    }, [activeTab, token]);
 
     return ( 
         <div className={cx('wrapper')}>
@@ -56,7 +89,7 @@ function Profile() {
                                 <img className={cx('avt')} alt='' src={user?.avatar ? `${process.env.REACT_APP_API_URL}${user.avatar}` : "../images/testavt.png"} />
                                 <div className={cx('flex','flex-col')}>
                                     <h1 className={cx('text-[20px]','font-semibold','text-[#263646]')}>{user?.fullname || 'Fullname'}</h1>
-                                    <span  className={cx('text-[16px]','mt-10[10px]')}>{user?.userId}</span>
+                                    <span className={cx('text-[16px]','mt-[10px]')}>{user?.userId}</span>
                                 </div>
                             </div>
                             <div className={cx('w-full')}>
@@ -88,87 +121,135 @@ function Profile() {
                         </div>
                     }
 
-                    {activeTab === "bill" && <div className={cx('bill')}>
-                            <div className={cx('bill-item')}>
-                                <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Tên khách hàng:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Nguyễn Quang Hoàng</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Địa chỉ:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Đà Nẵng không phải quê</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>SĐT:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>0905785273</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Ngày đặt:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>15/12/2004</span>
-                                </div> <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Mã hóa đơn:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>hoadon_02</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Hình thức thanh toán:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Thanh toán khi nhận hàng</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Sản phẩm mua:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Samsung Galaxy S23 Ultra SL 2, iPhone 14 Pro Max SL 1</span>
-                                </div>
-
-                                  <div className={cx('bill-infor','mb-[20px]','flex','items-center','ml-auto')}>
-                                    <p className={cx('font-normal','text-[16px]','text-red-500')}>Tổng giá:</p>
-                                    <span className={cx('font-medium','text-[16px]','ml-[6px]','text-red-500')}>24.000.000 (VNĐ)</span>
-                                </div>
-
-                                
-                            </div>
-                        </div>}
-                    {activeTab === "order" && <div className={cx('order')}>
-                               <div className={cx('bill-item')}>
-                                <div className={cx('flex','items-center','justify-between')}>
-                                    <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                        <p className={cx('font-normal','text-[14px]')}>Tên khách hàng:</p>
-                                        <span className={cx('font-medium','text-[14px]','ml-[6px]')}>{user?.fullname}</span>
+                    {activeTab === "bill" && (
+                        <div className={cx('bill')}>
+                            {loading && <div className={cx('text-[#888]', 'p-[20px]')}>Đang tải...</div>}
+                            {error && <div className={cx('text-[#888]', 'p-[20px]')}>{error}</div>}
+                            {!loading && !error && invoices.length === 0 && (
+                                <div className={cx('text-[#888]', 'p-[20px]')}>Không có hóa đơn nào</div>
+                            )}
+                            {!loading && !error && invoices.map((invoice) => (
+                                <div key={invoice.invoiceId} className={cx('bill-item')}>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Tên khách hàng:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.user?.fullname || 'Không xác định'}
+                                        </span>
                                     </div>
-                                    <span className={cx('font-semibold','text-[14px]','text-red-500')}>ĐANG XỬ LÝ</span>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Địa chỉ:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.address}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>SĐT:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.user?.phoneNumber || 'Không xác định'}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Ngày đặt:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {new Date(invoice.createdAt).toLocaleDateString('vi-VN')}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Mã hóa đơn:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.invoiceId}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Hình thức thanh toán:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Thanh toán trực tuyến'}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Sản phẩm mua:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.purchasedItems}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center', 'ml-auto')}>
+                                        <p className={cx('font-normal', 'text-[16px]', 'text-red-500')}>Tổng giá:</p>
+                                        <span className={cx('font-medium', 'text-[16px]', 'ml-[6px]', 'text-red-500')}>
+                                            {Number(invoice.totalPrice).toLocaleString('vi-VN')} (VNĐ)
+                                        </span>
+                                    </div>
                                 </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Địa chỉ:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Đà Nẵng không phải quê</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>SĐT:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>0905785273</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Ngày đặt:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>15/12/2004</span>
-                                </div> <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Mã hóa đơn:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>hoadon_02</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Hình thức thanh toán:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Thanh toán khi nhận hàng</span>
-                                </div>
-                                 <div className={cx('bill-infor','mb-[20px]','flex','items-center')}>
-                                    <p className={cx('font-normal','text-[14px]')}>Sản phẩm mua:</p>
-                                    <span className={cx('font-medium','text-[14px]','ml-[6px]')}>Samsung Galaxy S23 Ultra SL 2, iPhone 14 Pro Max SL 1</span>
-                                </div>
+                            ))}
+                        </div>
+                    )}
 
-                                  <div className={cx('bill-infor','mb-[20px]','flex','items-center','ml-auto')}>
-                                    <p className={cx('font-normal','text-[16px]','text-red-500')}>Tổng giá:</p>
-                                    <span className={cx('font-medium','text-[16px]','ml-[6px]','text-red-500')}>24.000.000 (VNĐ)</span>
+                    {activeTab === "order" && (
+                        <div className={cx('order')}>
+                            {loading && <div className={cx('text-[#888]', 'p-[20px]')}>Đang tải...</div>}
+                            {error && <div className={cx('text-[#888]', 'p-[20px]')}>{error}</div>}
+                            {!loading && !error && pendingInvoices.length === 0 && (
+                                <div className={cx('text-[#888]', 'p-[20px]')}>Không có đơn hàng chờ duyệt</div>
+                            )}
+                            {!loading && !error && pendingInvoices.map((invoice) => (
+                                <div key={invoice.invoiceId} className={cx('bill-item')}>
+                                    <div className={cx('flex', 'items-center', 'justify-between')}>
+                                        <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                            <p className={cx('font-normal', 'text-[14px]')}>Tên khách hàng:</p>
+                                            <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                                {invoice.user?.fullname || 'Không xác định'}
+                                            </span>
+                                        </div>
+                                        <span className={cx('font-semibold', 'text-[14px]', 'text-red-500')}>
+                                            ĐANG XỬ LÝ
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Địa chỉ:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.address}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>SĐT:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.user?.phoneNumber || 'Không xác định'}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Ngày đặt:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {new Date(invoice.createdAt).toLocaleDateString('vi-VN')}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Mã hóa đơn:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.invoiceId}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Hình thức thanh toán:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Thanh toán trực tuyến'}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center')}>
+                                        <p className={cx('font-normal', 'text-[14px]')}>Sản phẩm mua:</p>
+                                        <span className={cx('font-medium', 'text-[14px]', 'ml-[6px]')}>
+                                            {invoice.purchasedItems}
+                                        </span>
+                                    </div>
+                                    <div className={cx('bill-infor', 'mb-[20px]', 'flex', 'items-center', 'ml-auto')}>
+                                        <p className={cx('font-normal', 'text-[16px]', 'text-red-500')}>Tổng giá:</p>
+                                        <span className={cx('font-medium', 'text-[16px]', 'ml-[6px]', 'text-red-500')}>
+                                            {Number(invoice.totalPrice).toLocaleString('vi-VN')} (VNĐ)
+                                        </span>
+                                    </div>
                                 </div>
-
-                                
-                            </div>
-                        </div>}
+                            ))}
+                        </div>
+                    )}
                 </div>
-
             </div>
         </div>
      );

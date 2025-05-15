@@ -5,7 +5,7 @@ const invoiceService = {
       const formData = new URLSearchParams();
       formData.append("address", address);
       formData.append("paymentMethod", paymentMethod);
-      formData.append("purchasedItems", purchasedItems); // purchasedItems giờ là chuỗi
+      formData.append("purchasedItems", purchasedItems);
       formData.append("totalPrice", totalPrice);
       formData.append("status", status);
 
