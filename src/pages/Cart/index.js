@@ -4,6 +4,8 @@ import { IoIosArrowBack } from "react-icons/io";
 import { GoPlus, GoDash } from "react-icons/go";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FaTrash } from "react-icons/fa";
+
 import cartService from "@/services/cartService";
 import invoiceService from "@/services/invoiceService";
 import { useUser } from "@/contexts/UserContext";
@@ -11,21 +13,22 @@ import { useUser } from "@/contexts/UserContext";
 const cx = classNames.bind(styles);
 
 function CartPage() {
-  const { user } = useUser();
+  const { user, token } = useUser();
   const [cartItems, setCartItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]); // State để theo dõi các mục được chọn
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [cartId, setCartId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const result = await cartService.getCart(); 
+        const result = await cartService.getCart(token);
         console.log('Cart fetch result:', result);
         if (result.success) {
           const items = result.data.items || [];
+          setCartId(result.data.cart_id);
           setCartItems(items);
-          // Ban đầu, mặc định tất cả đều được chọn
           setSelectedItems(items.map(item => item.cart_item_id));
         } else {
           setError(result.message);
@@ -39,15 +42,42 @@ function CartPage() {
     };
 
     fetchCart();
-  }, [user]);
+  }, [user, token]);
 
-  // Xử lý chọn/bỏ chọn sản phẩm
   const handleSelectItem = (cartItemId) => {
-    setSelectedItems(prev => 
+    setSelectedItems(prev =>
       prev.includes(cartItemId)
         ? prev.filter(id => id !== cartItemId)
         : [...prev, cartItemId]
     );
+  };
+
+  const handleDeleteItems = async () => {
+    if (selectedItems.length === 0) {
+      alert("Vui lòng chọn ít nhất một sản phẩm để xóa!");
+      return;
+    }
+
+    const electronicIds = cartItems
+      .filter(item => selectedItems.includes(item.cart_item_id))
+      .map(item => item.electronic.electronic_id);
+
+    try {
+      const result = await cartService.deleteCartItems({
+        cartId,
+        electronicIds,
+      });
+
+      if (result.success) {
+        setCartItems(prev => prev.filter(item => !selectedItems.includes(item.cart_item_id)));
+        setSelectedItems([]);
+        alert("Đã xóa các sản phẩm khỏi giỏ hàng!");
+      } else {
+        alert("Lỗi: " + result.message);
+      }
+    } catch (err) {
+      alert("Không thể xóa sản phẩm: " + err.message);
+    }
   };
 
   // Tính tổng giá và danh sách sản phẩm được chọn
@@ -85,9 +115,7 @@ function CartPage() {
       const result = await invoiceService.createInvoice(invoicePayload);
       if (result.success) {
         alert("Đặt hàng thành công!");
-        // Chỉ giữ lại các mục không được chọn trong giỏ hàng
         setCartItems(prev => prev.filter(item => !selectedItems.includes(item.cart_item_id)));
-        setSelectedItems([]); // Reset danh sách chọn
       } else {
         alert("Lỗi: " + result.message);
       }
@@ -177,11 +205,16 @@ function CartPage() {
                 <div className={cx("text-[#888]", "p-[20px]")}>Giỏ hàng trống</div>
               )}
             </div>
-            <div className={cx("price")}>
-              <span className={cx("font-medium", "text-[16px]")}>Tổng giá trị:</span>
-              <span className={cx("ml-[10px]", "font-bold", "text-red-500")}>
-                {formattedPrice}
-              </span>
+            <div className={cx('flex','items-center')}>
+              <div className={cx("price")}>
+                <span className={cx("font-medium", "text-[16px]")}>Tổng giá trị:</span>
+                <span className={cx("ml-[10px]", "font-bold", "text-red-500")}>
+                  {formattedPrice}
+                </span>
+              </div>
+              <div className={cx('btn-delete')} onClick={handleDeleteItems}>
+                <FaTrash />
+              </div>
             </div>
           </div>
           <div className={cx("info-place")}>

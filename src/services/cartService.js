@@ -41,6 +41,22 @@ const cartService = {
       return { success: false, message };
     }
   },
+  deleteCartItems: async ({ cartId, electronicIds }) => {
+    try {
+      const response = await request.delete(
+        `/carts/delete-items?cartId=${cartId}&electronicIds=${electronicIds.join(',')}`,
+      );
+      console.log('Delete cart items response:', response.data);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Delete cart items error:', error.response?.data || error.message);
+      const message = error.response?.data?.error || 'Không thể xóa sản phẩm khỏi giỏ hàng';
+      return { success: false, message };
+    }
+  },
 };
 
 export default cartService;
