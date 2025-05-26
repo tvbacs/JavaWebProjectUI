@@ -723,15 +723,81 @@
 
   // 🎨 Special styling for specific form groups
   .form-group {
+    &.category-group {
+      position: relative;
+
+      &::before {
+        content: "📱";
+        position: absolute;
+        right: 40px;
+        top: 38px;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+
+    &.brand-group {
+      position: relative;
+
+      &::before {
+        content: "🏷️";
+        position: absolute;
+        right: 40px;
+        top: 38px;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+
     &.price-group {
+      position: relative;
+
       input {
-        padding-left: 12px;
+        padding-left: 40px;
+      }
+
+      &::before {
+        content: "💰";
+        position: absolute;
+        left: 12px;
+        top: 38px;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 1;
       }
     }
 
     &.quantity-group {
+      position: relative;
+
       input {
-        padding-left: 12px;
+        padding-left: 40px;
+      }
+
+      &::before {
+        content: "📦";
+        position: absolute;
+        left: 12px;
+        top: 38px;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+
+    &.status-group {
+      position: relative;
+
+      &::before {
+        content: "📊";
+        position: absolute;
+        right: 40px;
+        top: 38px;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 1;
       }
     }
 
@@ -739,28 +805,21 @@
       .file-upload-area {
         border: 2px dashed #dee2e6;
         border-radius: 12px;
-        padding: 40px 20px;
+        padding: 32px 20px;
         text-align: center;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         transition: all 0.3s ease;
         cursor: pointer;
-        position: relative;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
 
         &:hover {
           border-color: #667eea;
           background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
         }
 
         .upload-icon {
           font-size: 48px;
-          margin-bottom: 12px;
+          margin-bottom: 16px;
           display: block;
         }
 
@@ -775,7 +834,6 @@
           font-size: 12px;
           color: #6c757d;
           font-style: italic;
-          line-height: 1.4;
         }
       }
     }
@@ -973,8 +1031,6 @@
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
   }
 }
-
-// 🎨 Animations (removed bounce animation)
 
 // Responsive design
 @media (max-width: 768px) {

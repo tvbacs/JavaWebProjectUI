@@ -723,15 +723,86 @@
 
   // 🎨 Special styling for specific form groups
   .form-group {
+    &.category-group {
+      position: relative;
+
+      &::before {
+        content: "📱";
+        position: absolute;
+        right: 45px;
+        top: 42px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 2;
+        color: #667eea;
+      }
+    }
+
+    &.brand-group {
+      position: relative;
+
+      &::before {
+        content: "🏷️";
+        position: absolute;
+        right: 45px;
+        top: 42px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 2;
+        color: #667eea;
+      }
+    }
+
     &.price-group {
+      position: relative;
+
       input {
-        padding-left: 12px;
+        padding-left: 45px;
+      }
+
+      &::before {
+        content: "💰";
+        position: absolute;
+        left: 16px;
+        top: 42px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 2;
+        color: #667eea;
       }
     }
 
     &.quantity-group {
+      position: relative;
+
       input {
-        padding-left: 12px;
+        padding-left: 45px;
+      }
+
+      &::before {
+        content: "📦";
+        position: absolute;
+        left: 16px;
+        top: 42px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 2;
+        color: #667eea;
+      }
+    }
+
+    &.status-group {
+      position: relative;
+
+      &::before {
+        content: "📊";
+        position: absolute;
+        right: 45px;
+        top: 42px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 2;
+        color: #667eea;
       }
     }
 
@@ -762,6 +833,7 @@
           font-size: 48px;
           margin-bottom: 12px;
           display: block;
+          animation: bounce 2s infinite;
         }
 
         .upload-text {
@@ -974,7 +1046,18 @@
   }
 }
 
-// 🎨 Animations (removed bounce animation)
+// 🎨 Animations
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
 
 // Responsive design
 @media (max-width: 768px) {

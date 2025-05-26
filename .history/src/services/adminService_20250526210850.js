@@ -872,47 +872,6 @@ const adminService = {
 
   // ============ BRAND MANAGEMENT ============
 
-  // 🏷️ API THÊM THƯƠNG HIỆU MỚI - THỰC TẾ
-  createBrand: async (brandData) => {
-    try {
-      // Validate admin access
-      await validateAdminAccess();
-
-      console.log('🔄 Creating new brand via real API...', brandData);
-
-      // Gọi API thực theo spec: POST /brands
-      const response = await request.post('/brands', brandData);
-
-      console.log('✅ Brand created successfully via real API');
-      console.log('📋 Response:', response.data);
-
-      return {
-        success: true,
-        data: response.data,
-        message: `Thương hiệu "${brandData.brand_name}" đã được thêm thành công`
-      };
-    } catch (error) {
-      console.error('❌ Error creating brand:', error);
-
-      // Detailed error logging
-      if (error.response) {
-        console.error('❌ Response status:', error.response.status);
-        console.error('❌ Response data:', error.response.data);
-        console.error('❌ Response headers:', error.response.headers);
-      } else if (error.request) {
-        console.error('❌ Request made but no response:', error.request);
-      } else {
-        console.error('❌ Error setting up request:', error.message);
-      }
-
-      const message = error.response?.data?.error ||
-                     error.response?.data?.message ||
-                     error.message ||
-                     'Không thể thêm thương hiệu mới';
-      return { success: false, message };
-    }
-  },
-
   getBrandStatistics: async () => {
     try {
       // Get real electronics data and calculate brand statistics

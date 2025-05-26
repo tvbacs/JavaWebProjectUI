@@ -38,33 +38,19 @@ function AdminBrands() {
   const fetchBrands = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Fetching brands from /brands API...');
-
-      // Get brands directly from /brands API
-      const result = await brandService.getAllBrands();
-
-      console.log('📋 Brands API result:', result);
-
+      // Get brands from electronics data
+      const result = await electronicService.getAllElectronics();
       if (result.success) {
-        console.log('✅ Brands fetched successfully:', result.data.length, 'brands');
-        setBrands(result.data);
-      } else {
-        console.error('❌ Failed to fetch brands:', result.message);
-        // Fallback to electronics data if brands API fails
-        console.log('🔄 Falling back to electronics data...');
-        const electronicsResult = await electronicService.getAllElectronics();
-        if (electronicsResult.success) {
-          const uniqueBrands = electronicsResult.data.reduce((acc, product) => {
-            if (product.brand && !acc.find(brand => brand.brand_id === product.brand.brand_id)) {
-              acc.push(product.brand);
-            }
-            return acc;
-          }, []);
-          setBrands(uniqueBrands);
-        }
+        const uniqueBrands = result.data.reduce((acc, product) => {
+          if (product.brand && !acc.find(brand => brand.brand_id === product.brand.brand_id)) {
+            acc.push(product.brand);
+          }
+          return acc;
+        }, []);
+        setBrands(uniqueBrands);
       }
     } catch (error) {
-      console.error('❌ Error fetching brands:', error);
+      console.error('Error fetching brands:', error);
     } finally {
       setLoading(false);
     }
@@ -116,30 +102,17 @@ function AdminBrands() {
   // 🏷️ Handler thêm thương hiệu mới
   const handleCreateBrand = async (brandData) => {
     try {
-      console.log('🔄 Attempting to create brand:', brandData);
-
       const result = await brandService.createBrand(brandData);
-
-      console.log('📋 Create brand result:', result);
-
       if (result.success) {
-        alert('✅ ' + (result.message || 'Thêm thương hiệu thành công!'));
-
-        console.log('🔄 Refreshing brands list...');
-        await fetchBrands(); // Wait for brands to refresh
-
-        console.log('🔄 Refreshing stats...');
-        await fetchStats(); // Wait for stats to refresh
-
+        alert(result.message || 'Thêm thương hiệu thành công!');
+        fetchBrands();
+        fetchStats();
         setShowCreateModal(false);
-        console.log('✅ Brand creation process completed');
       } else {
-        console.error('❌ Create brand failed:', result.message);
-        alert('❌ Lỗi: ' + result.message);
+        alert('Lỗi: ' + result.message);
       }
     } catch (error) {
-      console.error('❌ Exception during brand creation:', error);
-      alert('❌ Có lỗi xảy ra khi thêm thương hiệu: ' + (error.message || 'Lỗi không xác định'));
+      alert('Có lỗi xảy ra khi thêm thương hiệu');
     }
   };
 
@@ -296,112 +269,6 @@ function AdminBrands() {
           onUpdate={handleUpdateBrand}
         />
       )}
-    </div>
-  );
-}
-
-// 📦 Create Brand Modal Component
-function CreateBrandModal({ onClose, onSubmit }) {
-  const [formData, setFormData] = useState({
-    brand_id: '',
-    brand_name: ''
-  });
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.brand_id.trim()) {
-      newErrors.brand_id = 'ID thương hiệu là bắt buộc';
-    }
-
-    if (!formData.brand_name.trim()) {
-      newErrors.brand_name = 'Tên thương hiệu là bắt buộc';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-    try {
-      await onSubmit(formData);
-    } catch (error) {
-      console.error('Error creating brand:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className={cx("modal-overlay")}>
-      <div className={cx("modal")}>
-        <div className={cx("modal-header")}>
-          <h3>Thêm thương hiệu mới</h3>
-          <button onClick={onClose} className={cx("close-btn")}>×</button>
-        </div>
-
-        <form onSubmit={handleSubmit} className={cx("modal-form")}>
-          <div className={cx("form-group")}>
-            <label>ID thương hiệu *</label>
-            <input
-              type="text"
-              name="brand_id"
-              value={formData.brand_id}
-              onChange={handleInputChange}
-              className={cx({ 'error': errors.brand_id })}
-              placeholder="VD: apple_001, samsung_002"
-              required
-            />
-            {errors.brand_id && <span className={cx("error-message")}>{errors.brand_id}</span>}
-          </div>
-
-          <div className={cx("form-group")}>
-            <label>Tên thương hiệu *</label>
-            <input
-              type="text"
-              name="brand_name"
-              value={formData.brand_name}
-              onChange={handleInputChange}
-              className={cx({ 'error': errors.brand_name })}
-              placeholder="VD: Apple, Samsung"
-              required
-            />
-            {errors.brand_name && <span className={cx("error-message")}>{errors.brand_name}</span>}
-          </div>
-
-          <div className={cx("modal-actions")}>
-            <button type="button" onClick={onClose} className={cx("cancel-btn")}>
-              Hủy
-            </button>
-            <button type="submit" disabled={loading} className={cx("submit-btn")}>
-              {loading ? 'Đang thêm...' : 'Thêm thương hiệu'}
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 }

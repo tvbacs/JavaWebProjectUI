@@ -84,25 +84,18 @@ function AdminOrders() {
 
   const handleUpdateStatus = async (invoiceId, newStatus) => {
     try {
-      console.log(`🔄 Attempting to update order ${invoiceId} to status ${newStatus}`);
-
       const result = await adminService.updateOrderStatus(invoiceId, newStatus);
-
-      console.log('📋 Update result:', result);
-
       if (result.success) {
-        alert('✅ Cập nhật trạng thái thành công!');
+        alert('Cập nhật trạng thái thành công!');
         fetchOrders();
         fetchStats();
         setShowStatusModal(false);
         setSelectedOrder(null);
       } else {
-        console.error('❌ Update failed:', result.message);
-        alert('❌ Lỗi: ' + result.message);
+        alert('Lỗi: ' + result.message);
       }
     } catch (error) {
-      console.error('❌ Exception during update:', error);
-      alert('❌ Có lỗi xảy ra khi cập nhật trạng thái: ' + (error.message || 'Lỗi không xác định'));
+      alert('Có lỗi xảy ra khi cập nhật trạng thái');
     }
   };
 

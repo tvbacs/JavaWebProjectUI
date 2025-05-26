@@ -15,7 +15,6 @@ import {
   MdAdd,
   MdDelete
 } from "react-icons/md";
-import { CreateProductModal, EditProductModal } from './ProductModal';
 
 const cx = classNames.bind(styles);
 
@@ -476,30 +475,6 @@ function AdminProducts() {
           onUpdate={handleUpdateStock}
         />
       )}
-
-      {/* Create Product Modal */}
-      {showCreateModal && (
-        <CreateProductModal
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={handleCreateProduct}
-          categories={categories}
-          brands={brands}
-        />
-      )}
-
-      {/* Edit Product Modal */}
-      {showEditModal && selectedProduct && (
-        <EditProductModal
-          product={selectedProduct}
-          onClose={() => {
-            setShowEditModal(false);
-            setSelectedProduct(null);
-          }}
-          onSubmit={handleEditProduct}
-          categories={categories}
-          brands={brands}
-        />
-      )}
     </div>
   );
 }
@@ -568,7 +543,7 @@ function StockUpdateModal({ product, onClose, onUpdate }) {
                 value={newQuantity}
                 onChange={handleQuantityChange}
                 className={cx({ 'error': error })}
-                placeholder="Nhập số lượng  (0-10,000)"
+                placeholder="Nhập số lượng (0-10,000)"
               />
               {error && <span className={cx("error-message")}>{error}</span>}
             </div>

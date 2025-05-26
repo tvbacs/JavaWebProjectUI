@@ -47,16 +47,10 @@ const brandService = {
 
   createBrand: async (brand) => {
     try {
-      console.log('🔄 Creating new brand via brandService...', brand);
+      // Validate admin access
+      await validateAdminAccess();
 
-      // Try to validate admin access, but continue if it fails for testing
-      try {
-        await validateAdminAccess();
-        console.log('✅ Admin access validated');
-      } catch (authError) {
-        console.warn('⚠️ Admin validation failed, but continuing for testing:', authError.message);
-        // Continue anyway for testing purposes
-      }
+      console.log('🔄 Creating new brand via brandService...', brand);
 
       const response = await request.post('/brands', brand);
 
@@ -75,11 +69,6 @@ const brandService = {
       if (error.response) {
         console.error('❌ Response status:', error.response.status);
         console.error('❌ Response data:', error.response.data);
-        console.error('❌ Response headers:', error.response.headers);
-      } else if (error.request) {
-        console.error('❌ Request made but no response:', error.request);
-      } else {
-        console.error('❌ Error setting up request:', error.message);
       }
 
       const message = error.response?.data?.error ||

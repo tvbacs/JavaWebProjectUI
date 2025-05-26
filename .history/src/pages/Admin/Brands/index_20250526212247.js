@@ -124,15 +124,9 @@ function AdminBrands() {
 
       if (result.success) {
         alert('✅ ' + (result.message || 'Thêm thương hiệu thành công!'));
-
-        console.log('🔄 Refreshing brands list...');
-        await fetchBrands(); // Wait for brands to refresh
-
-        console.log('🔄 Refreshing stats...');
-        await fetchStats(); // Wait for stats to refresh
-
+        fetchBrands();
+        fetchStats();
         setShowCreateModal(false);
-        console.log('✅ Brand creation process completed');
       } else {
         console.error('❌ Create brand failed:', result.message);
         alert('❌ Lỗi: ' + result.message);

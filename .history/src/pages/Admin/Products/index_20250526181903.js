@@ -15,7 +15,6 @@ import {
   MdAdd,
   MdDelete
 } from "react-icons/md";
-import { CreateProductModal, EditProductModal } from './ProductModal';
 
 const cx = classNames.bind(styles);
 
@@ -242,16 +241,6 @@ function AdminProducts() {
           <h1>Quản lý Sản phẩm</h1>
           <p>Quản lý kho hàng và inventory</p>
         </div>
-        <div className={cx("header-actions")}>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className={cx("add-btn")}
-            title="Thêm sản phẩm mới"
-          >
-            <MdAdd />
-            Thêm sản phẩm mới
-          </button>
-        </div>
       </div>
 
       {/* Statistics */}
@@ -434,23 +423,6 @@ function AdminProducts() {
                     >
                       <MdEdit />
                     </button>
-                    <button
-                      onClick={() => {
-                        setSelectedProduct(product);
-                        setShowEditModal(true);
-                      }}
-                      className={cx("edit-btn")}
-                      title="Sửa thông tin sản phẩm"
-                    >
-                      <MdEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id, product.name)}
-                      className={cx("delete-btn")}
-                      title="Xóa sản phẩm"
-                    >
-                      <MdDelete />
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -474,30 +446,6 @@ function AdminProducts() {
             setSelectedProduct(null);
           }}
           onUpdate={handleUpdateStock}
-        />
-      )}
-
-      {/* Create Product Modal */}
-      {showCreateModal && (
-        <CreateProductModal
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={handleCreateProduct}
-          categories={categories}
-          brands={brands}
-        />
-      )}
-
-      {/* Edit Product Modal */}
-      {showEditModal && selectedProduct && (
-        <EditProductModal
-          product={selectedProduct}
-          onClose={() => {
-            setShowEditModal(false);
-            setSelectedProduct(null);
-          }}
-          onSubmit={handleEditProduct}
-          categories={categories}
-          brands={brands}
         />
       )}
     </div>
@@ -568,7 +516,7 @@ function StockUpdateModal({ product, onClose, onUpdate }) {
                 value={newQuantity}
                 onChange={handleQuantityChange}
                 className={cx({ 'error': error })}
-                placeholder="Nhập số lượng  (0-10,000)"
+                placeholder="Nhập số lượng (0-10,000)"
               />
               {error && <span className={cx("error-message")}>{error}</span>}
             </div>

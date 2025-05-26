@@ -38,33 +38,19 @@ function AdminBrands() {
   const fetchBrands = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Fetching brands from /brands API...');
-
-      // Get brands directly from /brands API
-      const result = await brandService.getAllBrands();
-
-      console.log('📋 Brands API result:', result);
-
+      // Get brands from electronics data
+      const result = await electronicService.getAllElectronics();
       if (result.success) {
-        console.log('✅ Brands fetched successfully:', result.data.length, 'brands');
-        setBrands(result.data);
-      } else {
-        console.error('❌ Failed to fetch brands:', result.message);
-        // Fallback to electronics data if brands API fails
-        console.log('🔄 Falling back to electronics data...');
-        const electronicsResult = await electronicService.getAllElectronics();
-        if (electronicsResult.success) {
-          const uniqueBrands = electronicsResult.data.reduce((acc, product) => {
-            if (product.brand && !acc.find(brand => brand.brand_id === product.brand.brand_id)) {
-              acc.push(product.brand);
-            }
-            return acc;
-          }, []);
-          setBrands(uniqueBrands);
-        }
+        const uniqueBrands = result.data.reduce((acc, product) => {
+          if (product.brand && !acc.find(brand => brand.brand_id === product.brand.brand_id)) {
+            acc.push(product.brand);
+          }
+          return acc;
+        }, []);
+        setBrands(uniqueBrands);
       }
     } catch (error) {
-      console.error('❌ Error fetching brands:', error);
+      console.error('Error fetching brands:', error);
     } finally {
       setLoading(false);
     }
@@ -116,30 +102,17 @@ function AdminBrands() {
   // 🏷️ Handler thêm thương hiệu mới
   const handleCreateBrand = async (brandData) => {
     try {
-      console.log('🔄 Attempting to create brand:', brandData);
-
       const result = await brandService.createBrand(brandData);
-
-      console.log('📋 Create brand result:', result);
-
       if (result.success) {
-        alert('✅ ' + (result.message || 'Thêm thương hiệu thành công!'));
-
-        console.log('🔄 Refreshing brands list...');
-        await fetchBrands(); // Wait for brands to refresh
-
-        console.log('🔄 Refreshing stats...');
-        await fetchStats(); // Wait for stats to refresh
-
+        alert(result.message || 'Thêm thương hiệu thành công!');
+        fetchBrands();
+        fetchStats();
         setShowCreateModal(false);
-        console.log('✅ Brand creation process completed');
       } else {
-        console.error('❌ Create brand failed:', result.message);
-        alert('❌ Lỗi: ' + result.message);
+        alert('Lỗi: ' + result.message);
       }
     } catch (error) {
-      console.error('❌ Exception during brand creation:', error);
-      alert('❌ Có lỗi xảy ra khi thêm thương hiệu: ' + (error.message || 'Lỗi không xác định'));
+      alert('Có lỗi xảy ra khi thêm thương hiệu');
     }
   };
 

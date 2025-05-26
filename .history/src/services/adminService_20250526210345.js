@@ -712,40 +712,64 @@ const adminService = {
 
       console.log(`🔄 Updating order ${invoiceId} to status ${status} via real API...`);
 
-      // Gọi API thực theo spec: POST /invoices/{invoiceId}/status?status={status}
-      const response = await request.post(`/invoices/${invoiceId}/status`, null, {
-        params: { status }
-      });
+      // Thử nhiều endpoint có thể hoạt động
+      let response;
+      let success = false;
 
-      console.log('✅ Order status updated successfully via real API');
-      console.log('📋 Response:', response.data);
+      // Thử endpoint 1: POST /invoices/{invoiceId}/status?status={status}
+      try {
+        response = await request.post(`/invoices/${invoiceId}/status`, null, {
+          params: { status }
+        });
+        success = true;
+        console.log('✅ Method 1 successful: POST /invoices/{invoiceId}/status');
+      } catch (error1) {
+        console.log('❌ Method 1 failed, trying method 2...');
 
-      return {
-        success: true,
-        data: {
-          invoiceId: invoiceId,
-          status: status,
-          message: response.data?.message || `Đơn hàng ${invoiceId} đã được cập nhật thành ${status}`
-        },
-      };
-    } catch (error) {
-      console.error('❌ Error updating order status:', error);
+        // Thử endpoint 2: PUT /invoices/{invoiceId}/status
+        try {
+          response = await request.put(`/invoices/${invoiceId}/status`, { status });
+          success = true;
+          console.log('✅ Method 2 successful: PUT /invoices/{invoiceId}/status');
+        } catch (error2) {
+          console.log('❌ Method 2 failed, trying method 3...');
 
-      // Detailed error logging
-      if (error.response) {
-        console.error('❌ Response status:', error.response.status);
-        console.error('❌ Response data:', error.response.data);
-        console.error('❌ Response headers:', error.response.headers);
-      } else if (error.request) {
-        console.error('❌ Request made but no response:', error.request);
-      } else {
-        console.error('❌ Error setting up request:', error.message);
+          // Thử endpoint 3: PUT /admin/orders/{invoiceId}/status
+          try {
+            response = await request.put(`/admin/orders/${invoiceId}/status`, { status });
+            success = true;
+            console.log('✅ Method 3 successful: PUT /admin/orders/{invoiceId}/status');
+          } catch (error3) {
+            console.log('❌ Method 3 failed, trying method 4...');
+
+            // Thử endpoint 4: PATCH /invoices/{invoiceId}
+            try {
+              response = await request.patch(`/invoices/${invoiceId}`, { status });
+              success = true;
+              console.log('✅ Method 4 successful: PATCH /invoices/{invoiceId}');
+            } catch (error4) {
+              console.log('❌ All methods failed');
+              throw error4;
+            }
+          }
+        }
       }
 
-      const message = error.response?.data?.error ||
-                     error.response?.data?.message ||
-                     error.message ||
-                     'Không thể cập nhật trạng thái đơn hàng';
+      if (success) {
+        console.log('✅ Order status updated successfully via real API');
+        return {
+          success: true,
+          data: {
+            invoiceId: invoiceId,
+            status: status,
+            message: response.data || `Đơn hàng ${invoiceId} đã được cập nhật thành ${status}`
+          },
+        };
+      }
+
+    } catch (error) {
+      console.error('❌ Error updating order status:', error);
+      const message = error.response?.data?.error || error.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng';
       return { success: false, message };
     }
   },
@@ -871,47 +895,6 @@ const adminService = {
   },
 
   // ============ BRAND MANAGEMENT ============
-
-  // 🏷️ API THÊM THƯƠNG HIỆU MỚI - THỰC TẾ
-  createBrand: async (brandData) => {
-    try {
-      // Validate admin access
-      await validateAdminAccess();
-
-      console.log('🔄 Creating new brand via real API...', brandData);
-
-      // Gọi API thực theo spec: POST /brands
-      const response = await request.post('/brands', brandData);
-
-      console.log('✅ Brand created successfully via real API');
-      console.log('📋 Response:', response.data);
-
-      return {
-        success: true,
-        data: response.data,
-        message: `Thương hiệu "${brandData.brand_name}" đã được thêm thành công`
-      };
-    } catch (error) {
-      console.error('❌ Error creating brand:', error);
-
-      // Detailed error logging
-      if (error.response) {
-        console.error('❌ Response status:', error.response.status);
-        console.error('❌ Response data:', error.response.data);
-        console.error('❌ Response headers:', error.response.headers);
-      } else if (error.request) {
-        console.error('❌ Request made but no response:', error.request);
-      } else {
-        console.error('❌ Error setting up request:', error.message);
-      }
-
-      const message = error.response?.data?.error ||
-                     error.response?.data?.message ||
-                     error.message ||
-                     'Không thể thêm thương hiệu mới';
-      return { success: false, message };
-    }
-  },
 
   getBrandStatistics: async () => {
     try {

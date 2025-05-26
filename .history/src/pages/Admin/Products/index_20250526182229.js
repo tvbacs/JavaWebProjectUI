@@ -568,7 +568,7 @@ function StockUpdateModal({ product, onClose, onUpdate }) {
                 value={newQuantity}
                 onChange={handleQuantityChange}
                 className={cx({ 'error': error })}
-                placeholder="Nhập số lượng  (0-10,000)"
+                placeholder="Nhập số lượng (0-10,000)"
               />
               {error && <span className={cx("error-message")}>{error}</span>}
             </div>
