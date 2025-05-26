@@ -122,11 +122,6 @@ function Header() {
               </NavLink>
             ) : (
               <div className={cx('relative', 'flex','items-center')}>
-                {user?.type === 'admin' && localStorage.getItem('token') && (
-                  <Link to='/admin/dashboard' className={cx('admin-link', 'ml-[10px]')}>
-                    Admin
-                  </Link>
-                )}
                 <Link to='/profile'>
                   <img
                     src={formatAvatarUrl(user?.avatar)}
@@ -145,6 +140,11 @@ function Header() {
                     ref={userMenuRef}
                     className="absolute z-50 bg-white shadow-md rounded-md py-2 w-[120px] text-sm right-0 translate-y-full border-[1px]"
                   >
+                    {user?.type === 'admin' && localStorage.getItem('token') && (
+                      <li className="px-4 py-4 hover:bg-gray-100 cursor-pointer text-[14px]">
+                        <Link to='/admin/dashboard'>Admin</Link>
+                      </li>
+                    )}
                     <li
                       className="px-4 py-4 hover:bg-gray-100 cursor-pointer text-[14px]"
                       onClick={handleLogout}
