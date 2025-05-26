@@ -126,7 +126,7 @@ function Header() {
                   <img
                     src={formatAvatarUrl(user?.avatar)}
                     alt="avatar"
-                    className="w-[40px] h-[40px] rounded-full cursor-pointer ml-[10px]"
+                    className={cx("w-[40px]"," h-[40px]"," rounded-full ","cursor-pointer"," ml-[10px] ",'avt-header')}
                     onError={(e) => { e.target.src = "/images/testavt.png"; }}
                     onContextMenu={(e) => {
                       e.preventDefault();
@@ -142,7 +142,7 @@ function Header() {
                   >
                     {user?.type === 'admin' && localStorage.getItem('token') && (
                       <li className="px-4 py-4 hover:bg-gray-100 cursor-pointer text-[14px]">
-                        <Link to='/admin/dashboard'>Admin</Link>
+                        <Link to='/admin/dashboard'>Admin Page</Link>
                       </li>
                     )}
                     <li
