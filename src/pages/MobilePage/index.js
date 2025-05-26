@@ -145,7 +145,7 @@ function MobilePage() {
       <div className={cx('w-full', 'flex', 'flex-wrap', 'gap-[10px]')}>
         {mobiles.length > 0 ? (
           mobiles.map((product) => (
-            <Item key={product.id} product={product} className='min-w-[280px] max-w-[320px] flex-grow ]' />
+            <Item key={product.id} product={product} className='min-w-[280px] flex-auto max-w-[380px] flex-grow ]' />
           ))
         ) : (
           <div className={cx('text-[#888]', 'mt-[20px]')}>
